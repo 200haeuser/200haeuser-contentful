@@ -9,10 +9,10 @@ dataDir: src/data
 pagesDir: src/pages
 pageLayoutKey: template
 metadata:
-  title: Exto
-  description: A portfolio theme with a blog
-  author: Stackbit
-  authorURL: 'https://www.stackbit.com'
+  title: 200Häuser
+  description: Berlinweites Netzwerk für Betroffene von Verdrängung und Eigenbedarfskündigungen
+  author: 200Häuser
+  authorURL: 'https://www.200haeuser.de'
   images:
     small: images/demo-256x192.png
     large: images/demo-1024x768.png
@@ -36,7 +36,7 @@ stackbit_banner:
 models:
   config:
     type: config
-    label: Site Configuration
+    label: Globale Einstellungen
     fields:
       - type: string
         name: title
@@ -44,13 +44,20 @@ models:
         description: Site title
         required: true
       - type: string
-        name: description
-        label: Site Description
-        description: The default site description used in meta data.
+        name: baseurl
+        label: Base URL
+        description: Serve the website from the given base URL
+        hidden: true
+      - type: string
+        name: permalink
+        label: Permalink
+        description: 'The output path for your pages, posts, or collections.'
+        default: '/posts/:slug:output_ext'
+        hidden: true
       - type: enum
         name: color_scheme
         label: Color Scheme
-        description: The color scheme used for the site.
+        description: The color scheme of the theme.
         options:
           - light
           - dark
@@ -58,7 +65,7 @@ models:
       - type: enum
         name: accent_color
         label: Accent Color
-        description: The accent color of the site.
+        description: The accent color of the theme.
         options:
           - pink
           - green
@@ -66,110 +73,174 @@ models:
           - violet
           - yellow
         default: pink
-      - type: model
+      - type: object
         name: header
         label: Header Configuration
-        models:
-          - header
-      - type: model
+        fields:
+          - type: string
+            name: title
+            label: Header Title
+            description: The title displayed in the header if no logo image added.
+          - type: image
+            name: logo_img
+            label: Logo Image
+            description: The logo image displayed in the header.
+          - type: boolean
+            name: has_nav
+            label: Enable Navigation Menu
+            description: Display the navigation menu bar in the header.
+            default: true
+      - type: object
         name: footer
         label: Footer Configuration
-        models:
-          - footer
-  header:
-    type: object
-    label: Header Configuration
-    labelField: title
-    fields:
-      - type: string
-        name: title
-        label: Header Title
-        description: The title displayed in the header if no logo image added.
-      - type: image
-        name: logo_img
-        label: Logo Image
-        description: The logo image displayed in the header.
-      - type: boolean
-        name: has_nav
-        label: Enable Navigation Menu
-        description: Display the navigation menu bar in the header.
-        default: true
+        fields:
+          - type: string
+            name: content
+            label: Footer Content
+            description: The copyright text displayed in the footer.
+          - type: list
+            name: links
+            label: Links
+            description: A list of links displayed in the footer.
+            items:
+              type: object
+              labelField: text
+              fields:
+                - type: string
+                  name: text
+                  label: Link text
+                - type: string
+                  name: url
+                  label: URL
+                  widget: url
+                - type: boolean
+                  name: new_window
+                  label: Open in new window
+                  default: true
+          - type: boolean
+            name: has_social
+            label: Enable Social Links
+            description: Display social links in the footer.
+            default: true
+      - type: object
+        name: sass
+        label: Sass
+        hidden: true
+        fields:
+          - type: number
+            name: indentWidth
+            label: Indent Width
+            description: >-
+              Used to determine the number of spaces or tabs to be used for
+              indentation.
+            default: 4
+          - type: enum
+            name: style
+            label: Output Style
+            description: Determines the output format of the final CSS style.
+            options:
+              - nested
+              - expanded
+              - compact
+              - compressed
+            default: nested
+          - type: number
+            name: precision
+            label: Precision
+            description: >-
+              Used to determine how many digits after the decimal will be
+              allowed.
+            default: 10
       - type: list
-        name: nav_links
-        label: Navigation Links
-        description: List of navigation links.
-        items:
-          type: model
-          models:
-            - action
-  footer:
-    type: object
-    label: Footer Configuration
-    labelField: content
+        name: plugins
+        label: Plugins
+        hidden: true
+      - type: list
+        name: exclude
+        label: Exclude
+        description: Exclude directories and/or files from the conversion.
+        hidden: true
+  social:
+    type: data
+    file: social.json
+    label: Social Links
     fields:
-      - type: string
-        name: content
-        label: Footer Content
-        description: The copyright text displayed in the footer.
       - type: list
         name: links
-        label: Links
-        description: List of links in the footer.
-        items:
-          type: model
-          models:
-            - action
-      - type: boolean
-        name: has_social
-        label: Enable Social Links
-        description: Display social links in the footer.
-        default: true
-      - type: list
-        name: social_links
         label: Social Links
-        description: List of social links in the footer.
+        description: A list of social links displayed in the footer.
         items:
-          type: model
-          models:
-            - action
-  advanced:
+          type: object
+          labelField: title
+          fields:
+            - type: string
+              name: type
+              label: Type
+              hidden: true
+            - type: string
+              name: title
+              label: Title
+              required: true
+            - type: string
+              name: icon
+              label: Icon
+              description: Font Awesome icon class name.
+              required: true
+            - type: string
+              name: url
+              label: URL
+              widget: url
+              required: true
+  author:
+    type: data
+    file: author.json
+    label: Author
+    fields:
+      - type: string
+        name: name
+        label: Name
+      - type: string
+        name: email
+        label: Email
+      - type: image
+        name: avatar
+        label: Avatar
+  home:
     type: page
-    label: Advanced Page
-    layout: advanced
+    label: Home
+    template: home
+    file: index.md
     hideContent: true
+    singleInstance: true
     fields:
       - type: string
         name: title
         label: Title
         description: The title of the page.
         required: true
-      - type: boolean
-        name: hide_title
-        label: Hide page title
-        default: true
-      - type: string
-        name: excerpt
-        label: Excerpt
-        description: The excerpt of the page displayed in meta data.
       - type: list
         name: sections
         label: Sections
-        description: Page sections
+        description: Home page sections.
         items:
-          type: model
+          type: reference
           labelField: title
           models:
-            - section_content
-            - section_form
-            - section_grid
-            - section_hero
-            - section_portfolio
-            - section_posts
-            - section_testimonials
+            - contactblock
+            - contentblock
+            - heroblock
+            - portfolioblock
+            - postsblock
+            - servicesblock
+            - testimonialsblock
+      - type: page_menus
+        name: menus
+        label: Home Menus
+        description: Which menus should this page show up in
   blog:
     type: page
     label: Blog
-    layout: blog
+    template: blog
     file: blog/index.md
     hideContent: true
     singleInstance: true
@@ -179,32 +250,15 @@ models:
         label: Title
         description: The title of the page.
         required: true
-      - type: string
-        name: subtitle
-        label: Subtitle
-        description: The text shown just below the page title.
-      - type: boolean
-        name: hide_title
-        label: Hide page title and subtitle
-        default: false
-      - type: string
-        name: excerpt
-        label: Excerpt
-        description: The excerpt of the page displayed in meta data.
-      - type: enum
-        name: col_number
-        label: Columns
-        description: The number of posts in a row.
-        options:
-          - two
-          - three
-        default: three
-        required: true
+      - type: page_menus
+        name: menus
+        label: Blog Menus
+        description: Which menus should this page show up in
   portfolio:
     type: page
     label: Portfolio
-    layout: portfolio
-    file: portfolio/index.md
+    template: portfolio
+    file: betroffene-haeuser/index.md
     hideContent: true
     singleInstance: true
     fields:
@@ -217,10 +271,6 @@ models:
         name: subtitle
         label: Subtitle
         description: The text shown just below the page title.
-      - type: string
-        name: excerpt
-        label: Excerpt
-        description: The excerpt of the page displayed in meta data.
       - type: enum
         name: layout_style
         label: Layout Style
@@ -229,13 +279,39 @@ models:
           - mosaic
           - tiles
         default: mosaic
+      - type: page_menus
+        name: menus
+        label: Portfolio Menus
+        description: Which menus should this page show up in
+  contact:
+    type: page
+    label: Contact
+    template: contact
+    file: kontakt+impressum.md
+    singleInstance: true
+    fields:
+      - type: string
+        name: title
+        label: Title
+        description: The title of the page.
+        required: true
+      - type: string
+        name: subtitle
+        label: Subtitle
+        description: The text shown just below the page title.
+      - type: image
+        name: img_path
+        label: Image
+        description: The image shown below the page title and subtitle.
+      - type: page_menus
+        name: menus
+        label: Contact Menus
+        description: Which menus should this page show up in
   page:
     type: page
     label: Page
-    layout: page
-    exclude:
-      - blog/**
-      - portfolio/**
+    template: page
+    exclude: _posts/**
     fields:
       - type: string
         name: title
@@ -246,19 +322,19 @@ models:
         name: subtitle
         label: Subtitle
         description: The text shown just below the page title.
-      - type: string
-        name: excerpt
-        label: Excerpt
-        description: The excerpt of the page displayed in meta data.
       - type: image
-        name: image
+        name: img_path
         label: Image
         description: The image shown below the page title and subtitle.
+      - type: page_menus
+        name: menus
+        label: Page Menus
+        description: Which menus should this page show up in
   post:
     type: page
     label: Post
-    layout: post
-    folder: blog
+    template: post
+    folder: _posts
     fields:
       - type: string
         name: title
@@ -274,22 +350,26 @@ models:
         label: Date
         required: true
       - type: image
-        name: thumb_image
+        name: thumb_img_path
         label: Featured Image
         description: The image shown in the blog feed.
       - type: image
-        name: image
+        name: content_img_path
         label: Alternative Featured Image
         description: The image shown in the single post.
       - type: string
         name: excerpt
         label: Excerpt
-        description: The excerpt of the post displayed in the blog feed and in meta data.
+        description: The excerpt of the post displayed in the blog feed.
+      - type: page_menus
+        name: menus
+        label: Post Menus
+        description: Which menus should this page show up in
   project:
     type: page
     label: Project
-    layout: project
-    folder: portfolio
+    template: project
+    folder: haeuser
     fields:
       - type: string
         name: title
@@ -300,22 +380,23 @@ models:
         name: subtitle
         label: Subtitle
         description: The text shown just below the project title.
-      - type: string
-        name: excerpt
-        label: Excerpt
-        description: The excerpt of the page displayed in meta data.
       - type: date
+      - type: number
         name: date
         label: Date
         required: true
       - type: image
-        name: thumb_image
+        name: thumb_img_path
         label: Featured Image
         description: The image shown in the project page.
       - type: image
-        name: image
+        name: content_img_path
         label: Alternative Featured Image
         description: The image shown in the single project.
+      - type: page_menus
+        name: menus
+        label: Project Menus
+        description: Which menus should this page show up in
   section:
     type: object
     label: Section
@@ -328,123 +409,82 @@ models:
       - type: string
         name: section_id
         label: Element ID
-        description: >-
-          A unique identifier that can be used when linking to this section.
-          Must not contain whitespace.
-  section_content:
+      - type: string
+        name: component
+        label: Component
+        required: true
+        hidden: true
+  action:
     type: object
-    label: Content Section
+    label: Action
+    labelField: label
+    fields:
+      - type: string
+        name: label
+        label: Label
+        required: true
+        description: The text displayed inside the button.
+      - type: string
+        name: url
+        label: Button URL
+        widget: url
+  contactblock:
+    type: object
+    label: Section with Contact Form
     extends:
       - section
     fields:
+      - name: component
+        default: contact_block.html
       - type: string
         name: subtitle
         label: Subtitle
         description: The subtitle of the section.
-      - type: image
-        name: image
-        label: Image
-        description: The image of the section.
+  contentblock:
+    type: object
+    label: Content Section with Optional Image
+    extends:
+      - section
+    fields:
+      - name: component
+        default: content_block.html
+      - type: string
+        name: subtitle
+        label: Subtitle
+        description: The subtitle of the section.
       - type: markdown
         name: content
         label: Content
         description: The text content of the section.
+      - type: image
+        name: image
+        label: Image
+        description: The image displayed below the section title.
       - type: list
         name: actions
         label: Action Buttons
         items:
-          type: model
-          models:
-            - action
-  section_form:
-    type: object
-    label: Form Section
-    extends:
-      - section
-    fields:
-      - type: string
-        name: subtitle
-        label: Subtitle
-        description: The subtitle of the section.
-      - type: markdown
-        name: content
-        label: Content
-        description: The text content of the section.
-      - type: string
-        name: form_id
-        label: Form ID
-        description: A unique identifier of the form. Must not contain whitespace.
-        required: true
-      - type: string
-        name: form_action
-        label: Form Action
-        description: >-
-          The path of your custom "success" page, if you want to replace the
-          default success message.
-      - type: list
-        name: form_fields
-        label: Form Fields
-        items:
-          type: model
-          models:
-            - form_field
-      - type: string
-        name: submit_label
-        label: Submit Button Label
-        required: true
-  section_grid:
-    type: object
-    label: Grid Section
-    extends:
-      - section
-    fields:
-      - type: string
-        name: subtitle
-        label: Subtitle
-        description: The subtitle of the section.
-      - type: enum
-        name: col_number
-        label: Columns
-        description: The number of grid items in a row.
-        options:
-          - two
-          - three
-        default: three
-        required: true
-      - type: boolean
-        name: is_numbered
-        label: Number the grid items
-        default: false
-      - type: list
-        name: grid_items
-        label: Grid Items
-        items:
-          type: model
-          models:
-            - grid_item
-  section_hero:
+          type: action
+  heroblock:
     type: object
     label: Hero Section
     extends:
       - section
     fields:
+      - name: component
+        default: hero_block.html
       - type: markdown
         name: content
         label: Content
         description: The text content of the section.
-      - type: list
-        name: actions
-        label: Action Buttons
-        items:
-          type: model
-          models:
-            - action
-  section_portfolio:
+  portfolioblock:
     type: object
-    label: Portfolio Section
+    label: Latest Projects
     extends:
       - section
     fields:
+      - name: component
+        default: portfolio_block.html
       - type: string
         name: subtitle
         label: Subtitle
@@ -457,181 +497,167 @@ models:
           - mosaic
           - tiles
         default: mosaic
-        required: true
       - type: number
-        name: projects_number
+        name: num_projects_displayed
         label: Number of projects to display
         required: true
       - type: string
-        name: view_all_label
-        label: All projects button label
+        name: view_all_text
+        label: All projects button text
         description: The text displayed inside the button.
       - type: string
         name: view_all_url
         label: All projects button URL
-  section_posts:
+  postsblock:
     type: object
-    label: Posts Section
+    label: Latest Posts
     extends:
       - section
     fields:
+      - name: component
+        default: posts_block.html
       - type: string
         name: subtitle
         label: Subtitle
         description: The subtitle of the section.
       - type: number
-        name: posts_number
-        label: The number of posts to display.
+        name: num_posts_displayed
+        label: Number of posts to display
         required: true
-        default: 3
-      - type: enum
-        name: col_number
-        label: Columns
-        description: The number of posts in a row.
-        options:
-          - two
-          - three
-        default: three
-        required: true
-      - type: list
-        name: actions
-        label: Action Buttons
-        items:
-          type: model
-          models:
-            - action
-  section_testimonials:
-    type: object
-    label: Testimonials Section
-    extends:
-      - section
-    fields:
-      - type: string
-        name: subtitle
-        label: Subtitle
-        description: The subtitle of the section.
-      - type: enum
-        name: col_number
-        label: Columns
-        description: The number of testimonials in a row.
-        options:
-          - two
-          - three
-        default: three
-        required: true
-      - type: list
-        name: testimonials
-        label: Testimonials
-        items:
-          type: model
-          models:
-            - testimonial
-  action:
-    type: object
-    label: Action
-    labelField: label
-    fields:
-      - type: string
-        name: label
-        label: Label
-        required: true
-      - type: string
-        name: url
-        label: URL
-        required: true
-        widget: url
-      - type: enum
-        name: style
-        label: Style
-        options:
-          - link
-          - button
-          - icon
-        default: link
-        required: true
-      - type: string
-        name: icon_class
-        label: Icon
-        description: 'Font Awesome icon class name, used only when style is "icon".'
-      - type: boolean
-        name: new_window
-        label: Open in new tab/window
-        default: false
-  grid_item:
-    type: object
-    label: Grid Item
-    labelField: title
-    fields:
-      - type: string
-        name: title
-        label: Title
-        description: The title of the grid item.
-      - type: image
-        name: image
-        label: Image
-        description: The image of the grid item.
-      - type: markdown
-        name: content
-        label: Content
-        description: The text content of the grid item.
       - type: list
         name: actions
         label: Action Buttons
         items:
           type: action
-  testimonial:
+  servicesblock:
     type: object
-    label: Testimonial
-    labelField: author
+    label: Services Section
+    extends:
+      - section
     fields:
+      - name: component
+        default: services_block.html
       - type: string
-        name: author
-        label: Author
-        description: The author of the testimonial.
-        required: true
-      - type: image
-        name: avatar
-        label: Avatar
-        description: The avatar of the testimonial author.
-      - type: string
-        name: content
-        label: Content
-        description: The text content of the testimonial.
-        required: true
-  form_field:
-    type: object
-    label: Form Field
-    labelField: name
-    fields:
-      - type: enum
-        name: input_type
-        label: Type
-        options:
-          - text
-          - email
-          - tel
-          - number
-          - checkbox
-          - textarea
-          - select
-        description: Type of the form field.
-        required: true
-      - type: string
-        name: name
-        label: Name
-        description: 'The name of the field, submitted with the form.'
-        required: true
-      - type: string
-        name: label
-        label: Label
-        description: 'The caption of the field, shown above the field input.'
-      - type: string
-        name: default_value
-        description: The default value for textual field types.
+        name: subtitle
+        label: Subtitle
+        description: The subtitle of the section.
       - type: list
-        name: options
-        description: 'The list of options, used only when the field type is "select".'
-      - type: boolean
-        name: is_required
-        label: Is the field required?
-        default: false
+        name: serviceslist
+        label: Services
+        items:
+          type: object
+          label: Service
+          labelField: title
+          fields:
+            - type: string
+              name: title
+              label: Title
+              description: The title of the service.
+            - type: markdown
+              name: content
+              label: Content
+              description: The text content of the service.
+  testimonialsblock:
+    type: object
+    label: Testimonials Section
+    extends:
+      - section
+    fields:
+      - name: component
+        default: testimonials_block.html
+      - type: string
+        name: subtitle
+        label: Subtitle
+        description: The subtitle of the section.
+      - type: list
+        name: testimonialslist
+        label: Testimonials
+        items:
+          type: object
+          label: Testimonial
+          labelField: author
+          fields:
+            - type: string
+              name: author
+              label: Author
+              description: The author of the testimonial.
+            - type: image
+              name: avatar
+              label: Avatar
+              description: The avatar of the testimonial author.
+            - type: string
+              name: content
+              label: Content
+              description: The text content of the testimonial.
+  site_menus:
+    type: data
+    file: menus.yml
+    label: Site Menus
+    labelField: null
+    description: >-
+      Site menus model, defines list of menus that can be specified from within
+      site configuration
+    fields:
+      - type: list
+        name: main
+        label: Main menu
+        description: List of items for Main menu
+        items:
+          type: site_menu_item
+  site_menu_item:
+    type: object
+    label: Site Menu Item
+    labelField: title
+    description: 'Site menu item model, defines fields for a single site menu item'
+    fields:
+      - type: string
+        name: identifier
+        label: Identifier
+        description: >-
+          The identifier of a menu item could be used as a parent menu of
+          another menu item
+        required: true
+      - type: string
+        name: title
+        label: Title
+        description: The title of the menu item
+        required: true
+      - type: string
+        name: url
+        label: URL
+        description: The URL the menu item links to
+        required: true
+      - type: number
+        name: weight
+        label: Weight
+        description: Position for sorting
+  page_menus:
+    type: object
+    label: Page Menus
+    labelField: null
+    description: 'Page menus model, defines menus that can be specified from within pages'
+    fields:
+      - type: page_menu_item
+        name: main
+        label: Main menu item
+        description: Main menu item for this page
+  page_menu_item:
+    type: object
+    label: Page Menu Item
+    labelField: title
+    description: 'Page menu item model, defines fields for a single page menu item'
+    fields:
+      - type: string
+        name: title
+        label: Title
+        description: The title of the menu item
+      - type: number
+        name: weight
+        label: Weight
+        description: Position for sorting
+      - type: string
+        name: identifier
+        label: Identifier
+        description: >-
+          The identifier of a menu item could be used as a parent menu of
+          another menu item
